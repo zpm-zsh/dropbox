@@ -69,9 +69,6 @@ if (( CURRENT > 1 )); then
 		puburl|ls|filestatus)
 			_files
 		;;
-		*)
-			return
-		;;
 	esac
 fi
 

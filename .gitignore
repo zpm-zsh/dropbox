@@ -1,1 +1,4 @@
+.directory
 *.zwc
+*.old
+custom/*
