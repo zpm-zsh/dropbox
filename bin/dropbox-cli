@@ -609,7 +609,7 @@ class DropboxCommand(object):
         self.s.settimeout(timeout)
         try:
             self.s.connect(os.path.expanduser(u'~/.dropbox/command_socket'))
-        except socket.error, e:
+        except socket.error:
             raise DropboxCommand.CouldntConnectError()
         self.f = self.s.makefile("r+", 4096)
 
@@ -620,7 +620,7 @@ class DropboxCommand(object):
     def __readline(self):
         try:
             toret = self.f.readline().decode('utf8').rstrip(u"\n")
-        except socket.error, e:
+        except socket.error:
             raise DropboxCommand.BadConnectionError()
         if toret == '':
             raise DropboxCommand.EOFError()
@@ -917,7 +917,7 @@ options:
                             clean, formatted = path_to_string(unicode_abspath(os.path.join(name, subname)))
                             clean_paths.append(clean)
                             formatted_paths.append(formatted)
-                        except (UnicodeEncodeError, UnicodeDecodeError), e:
+                        except (UnicodeEncodeError, UnicodeDecodeError):
                             continue
 
                     columnize(clean_paths, formatted_paths)
@@ -1070,11 +1070,11 @@ Stops the dropbox daemon.
         with closing(DropboxCommand()) as dc:
             try:
                 dc.tray_action_hard_exit()
-            except DropboxCommand.BadConnectionError, e:
+            except DropboxCommand.BadConnectionError:
                 console_print(u"Dropbox isn't responding!")
             except DropboxCommand.EOFError:
                 console_print(u"Dropbox daemon stopped.")
-    except DropboxCommand.CouldntConnectError, e:
+    except DropboxCommand.CouldntConnectError:
         console_print(u"Dropbox isn't running!")
 
 #returns true if link is necessary
@@ -1088,13 +1088,13 @@ def grab_link_url_if_necessary():
                     return True
                 else:
                     return False
-            except DropboxCommand.CommandError, e:
+            except DropboxCommand.CommandError:
                 pass
-            except DropboxCommand.BadConnectionError, e:
+            except DropboxCommand.BadConnectionError:
                 console_print(u"Dropbox isn't responding!")
             except DropboxCommand.EOFError:
                 console_print(u"Dropbox daemon stopped.")
-    except DropboxCommand.CouldntConnectError, e:
+    except DropboxCommand.CouldntConnectError:
         console_print(u"Dropbox isn't running!")
 
 @command
