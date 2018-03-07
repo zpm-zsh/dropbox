@@ -858,7 +858,7 @@ options:
 
                     if len(dirs) == 0 and len(nondirs) == 0:
                         #TODO: why?
-                        exit(1)
+                        sys.exit(1)
 
                 dirs.sort(key=methodcaller('lower'))
                 nondirs.sort(key=methodcaller('lower'))
