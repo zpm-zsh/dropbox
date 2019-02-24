@@ -3,17 +3,22 @@
 
 local -a _1st_arguments
 _1st_arguments=(
-    'status:get current status of the dropboxd'
-    'puburl:get public url of a file in your dropbox'
-    'start:start dropboxd'
-    'stop:stop dropboxd'
-    'ls:list directory contents with current sync status'
-    'filestatus:get current sync status of one or more files'
-    'exclude:ignores/excludes a directory from syncing'
-    'lansync:enables or disables LAN sync'
-    'running:return whether dropbox is running'
-    'autostart:automatically start dropbox at login'
-    'help:provide help'
+	'update:download latest version of dropbox'
+	'filestatus:get current sync status of one or more files'
+	'ls:list directory contents with current sync status'
+	'puburl:get public url of a file in your dropbox public folder'
+	'sharelink:get a shared link for a file in your dropbox'
+	'proxy:set proxy settings for Dropbox'
+	'throttle:set bandwidth limits for Dropbox'
+	'status:get current status of the dropboxd'
+	'running:return whether dropbox is running'
+	'stop:stop dropboxd'
+	'lansync:enables or disables LAN sync'
+	'exclude:ignores/excludes a directory from syncing'
+	'start:start dropboxd'
+	'autostart:automatically start dropbox at login'
+	'help:provide help'
+
 )
 
 _dropbox_autostart=(
@@ -24,6 +29,18 @@ _dropbox_autostart=(
 _dropbox_lansync=(
 	'y:dropbox will use LAN sync'
 	'n:dropbox will not use LAN sync'
+)
+
+_dropbox_proxy=(
+	'none'
+	'auto'
+	'manual'
+)
+
+_dropbox_proxy_types=(
+	'http'
+	'socks4'
+	'socks5'
 )
 
 _dropbox_exclude=(
@@ -55,10 +72,13 @@ if (( CURRENT == 2 )); then
 		lansync)
 			_describe -t commands "Dropbox-cli lansync" _dropbox_lansync
 		;;
+		proxy)
+			_describe -t commands "Dropbox-cli proxy" _dropbox_proxy
+		;;
 		exclude)
 			_describe -t commands "Dropbox-cli exclude" _dropbox_exclude
 		;;
-		puburl|ls|filestatus)
+		puburl|ls|filestatus|sharelink)
 			_files
 		;;
 		*)
@@ -85,6 +105,12 @@ if (( CURRENT > 2 )); then
   				_arguments "*: :( $_dropbox_exclude_files )" 
 			;;
 		esac
+	elif [[ "$words[1]" == "proxy" ]]; then
+		if (( CURRENT == 3 )); then
+			if [[ "$words[2]" == "manual" ]]; then
+				_describe -t commands "Dropbox-cli proxy" _dropbox_proxy_types
+			fi
+		fi
 	fi
 fi
 
