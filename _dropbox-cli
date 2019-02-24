@@ -89,7 +89,7 @@ fi
 
 if (( CURRENT > 1 )); then
 	case "$words[1]" in
-		puburl|ls|filestatus)
+		puburl|ls|filestatus|sharelink)
 			_files
 		;;
 	esac
