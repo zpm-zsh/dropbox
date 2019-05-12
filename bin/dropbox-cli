@@ -4,7 +4,7 @@
 #
 # dropbox
 # Dropbox frontend script
-# This file is part of nautilus-dropbox 2019.01.31.
+# This file is part of nautilus-dropbox 2019.02.14.
 #
 # nautilus-dropbox is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ from posixpath import curdir, sep, pardir, join, abspath, commonprefix
 INFO = "Dropbox is the easiest way to share and store your files online. Want to learn more? Head to"
 LINK = "https://www.dropbox.com/"
 WARNING = "In order to use Dropbox, you must download the proprietary daemon."
-GPG_WARNING = "Note: python-gpg (python-gpgme for Ubuntu 16.10 and lower) is not installed, we will not be able to verify binary signatures."
+GPG_WARNING = "Note: python3-gpg (python3-gpgme for Ubuntu 16.10 and lower) is not installed, we will not be able to verify binary signatures."
 ERROR_CONNECTING = "Trouble connecting to Dropbox servers. Maybe your internet connection is down, or you need to set your http_proxy environment variable."
 ERROR_SIGNATURE = "Downloaded binary does not match Dropbox signature, aborting install."
 ERROR_INVALID_DROPBOX = "Could not start the Dropbox daemon. Make sure your computer meets the minimum requirements:\nhttps://www.dropbox.com/help/desktop-web/system-requirements#desktop"
@@ -70,7 +70,8 @@ DOWNLOADING = "Downloading Dropbox... %d%%"
 UNPACKING = "Unpacking Dropbox... %d%%"
 
 PARENT_DIR = os.path.expanduser("~")
-DROPBOXD_PATH = "%s/.dropbox-dist/dropboxd" % PARENT_DIR
+DROPBOX_DIST_PATH = "%s/.dropbox-dist" % PARENT_DIR
+DROPBOXD_PATH = os.path.join(DROPBOX_DIST_PATH, "dropboxd")
 DESKTOP_FILE = "/usr/share/applications/dropbox.desktop"
 
 enc = locale.getpreferredencoding()
@@ -194,7 +195,7 @@ def verify_signature(key_file, sig_file, plain_file):
 
 def download_file_chunk(url, buf):
     opener = urllib.request.build_opener()
-    opener.addheaders = [('User-Agent', "DropboxLinuxDownloader/2019.01.31")]
+    opener.addheaders = [('User-Agent', "DropboxLinuxDownloader/2019.02.14")]
 
     with closing(opener.open(url)) as f:
         size = int(f.info()['content-length'])
@@ -843,11 +844,12 @@ def columnize(list, display_list=None, display_width=None):
 
 @command
 def update(args):
-    """download latest version of dropbox
+    """download latest version of Dropbox
 dropbox update
 
-Downloads the latest version of dropbox.
-"""
+Downloads the latest version of Dropbox. This should not be required
+normally, as Dropbox automatically updates itself.
+    """
     download()
 
 @command
@@ -860,9 +862,9 @@ dropbox filestatus [-l] [-a] [FILE]...
 Prints the current status of each FILE.
 
 options:
-  -l --list  prints out information in a format similar to ls. works best when your console supports color :)
-  -a --all   do not ignore entries starting with .
-"""
+  -l --list  Prints out information in a format similar to ls. Works best when your console supports color :)
+  -a --all   Do not ignore entries starting with "."
+    """
     global enc
 
     oparser = optparse.OptionParser()
@@ -1020,17 +1022,17 @@ def ls(args):
 dropbox ls [FILE]...
 
 This is an alias for filestatus -l
-"""
+    """
     return filestatus(["-l"] + args)
 
 @command
 @requires_dropbox_running
 def puburl(args):
-    """get public url of a file in your dropbox's public folder
+    """get public url of a file in your Dropbox's public folder
 dropbox puburl FILE
 
 Prints out a public url for FILE (which must be in your public folder).
-"""
+    """
     if len(args) != 1:
         console_print(puburl.__doc__,linebreak=False)
         return
@@ -1051,11 +1053,11 @@ Prints out a public url for FILE (which must be in your public folder).
 @command
 @requires_dropbox_running
 def sharelink(args):
-    """get a shared link for a file in your dropbox
+    """get a shared link for a file in your Dropbox
 dropbox sharelink FILE
 
 Prints out a shared link for FILE.
-"""
+    """
     if len(args) != 1:
         console_print(sharelink.__doc__, linebreak=False)
         return
@@ -1089,7 +1091,7 @@ HOST - proxy hostname (only valid with "manual" mode)
 PORT - proxy port (only valid with "manual" mode)
 USERNAME - (optional) proxy username (only valid with "manual" mode)
 PASSWORD - (optional) proxy password (only valid with "manual" mode)
-"""
+    """
     mode = None
     type_ = None
     if len(args) >= 1:
@@ -1140,7 +1142,7 @@ Set bandwidth limits for file sync.
 
 DOWNLOAD - either "unlimited" or a manual limit in KB/s
 UPLOAD - one of "unlimited", "auto", or a manual limit in KB/s
-"""
+    """
     if len(args) != 2:
         console_print(throttle.__doc__, linebreak=False)
         return
@@ -1202,7 +1204,7 @@ def status(args):
 dropbox status
 
 Prints out the current status of the Dropbox daemon.
-"""
+    """
     if len(args) != 0:
         console_print(status.__doc__,linebreak=False)
         return
@@ -1230,11 +1232,11 @@ Prints out the current status of the Dropbox daemon.
 
 @command
 def running(argv):
-    """return whether dropbox is running
+    """return whether Dropbox is running
 dropbox running
 
-Returns 1 if running 0 if not running.
-"""
+Returns 1 if running, and 0 if not running.
+    """
     return int(is_dropbox_running())
 
 @command
@@ -1243,8 +1245,8 @@ def stop(args):
     """stop dropboxd
 dropbox stop
 
-Stops the dropbox daemon.
-"""
+Stops the Dropbox daemon.
+    """
     try:
         with closing(DropboxCommand()) as dc:
             try:
@@ -1263,7 +1265,7 @@ def grab_link_url_if_necessary():
             try:
                 link_url = dc.needs_link().get("link_url", None)
                 if link_url is not None:
-                    console_print("To link this computer to a dropbox account, visit the following url:\n%s" % link_url[0])
+                    console_print("To link this computer to a Dropbox account, visit the following url:\n%s" % link_url[0])
                     return True
                 else:
                     return False
@@ -1283,9 +1285,9 @@ def lansync(argv):
 dropbox lansync [y/n]
 
 options:
-  y  dropbox will use LAN sync (default)
-  n  dropbox will not use LAN sync
-"""
+  y  Dropbox will use LAN sync (default)
+  n  Dropbox will not use LAN sync
+    """
     if len(argv) != 1:
         console_print(lansync.__doc__, linebreak=False)
         return
@@ -1314,11 +1316,15 @@ dropbox exclude add [DIRECTORY] [DIRECTORY] ...
 dropbox exclude remove [DIRECTORY] [DIRECTORY] ...
 
 "list" prints a list of directories currently excluded from syncing.
-"add" adds one or more directories to the exclusion list, then resynchronizes Dropbox.
-"remove" removes one or more directories from the exclusion list, then resynchronizes Dropbox.
+"add" adds one or more directories to the exclusion list, then
+resynchronizes Dropbox.
+"remove" removes one or more directories from the exclusion list, then
+resynchronizes Dropbox.
+
 With no arguments, executes "list".
+
 Any specified path must be within Dropbox.
-"""
+    """
     if len(args) == 0:
         try:
             with closing(DropboxCommand()) as dc:
@@ -1408,11 +1414,12 @@ def start(argv):
     """start dropboxd
 dropbox start [-i]
 
-Starts the dropbox daemon, dropboxd. If dropboxd is already running, this will do nothing.
+Starts the Dropbox daemon, dropboxd. If dropboxd is already running,
+this will do nothing.
 
 options:
   -i --install  auto install dropboxd if not available on the system
-"""
+    """
 
     should_install = "-i" in argv or "--install" in argv
 
@@ -1472,15 +1479,15 @@ def reroll_autostart(should_autostart):
 
 @command
 def autostart(argv):
-    """automatically start dropbox at login
+    """automatically start Dropbox at login
 dropbox autostart [y/n]
 
 options:
-  n  dropbox will not start automatically at login
-  y  dropbox will start automatically at login (default)
+  n  Dropbox will not start automatically at login
+  y  Dropbox will start automatically at login (default)
 
 Note: May only work on current Ubuntu distributions.
-"""
+    """
     if len(argv) != 1:
         console_print(''.join(autostart.__doc__.split('\n', 1)[1:]))
         return
@@ -1499,35 +1506,55 @@ Note: May only work on current Ubuntu distributions.
         reroll_autostart(should_autostart)
 
 @command
+def version(argv):
+    """print version information for Dropbox
+dropbox version
+
+Prints the version information for the Dropbox proprietary daemon, if
+it's installed, and the Dropbox command-line interface.
+    """
+    dropbox_daemon_version = "Not installed"
+    try:
+        with open(os.path.join(DROPBOX_DIST_PATH, 'VERSION')) as f:
+            dropbox_daemon_version = f.read().strip()
+    except OSError:
+        pass
+
+    console_print("Dropbox daemon version: %s" % dropbox_daemon_version)
+    console_print("Dropbox command-line interface version: 2019.02.14")
+
+@command
 def help(argv):
     """provide help
 dropbox help [COMMAND]
 
-With no arguments, print a list of commands and a short description of each. With a command, print descriptive help on how to use the command.
-"""
+With no arguments, print a list of commands and a short description of
+each. With a command, print descriptive help on how to use the
+command.
+    """
     if not argv:
-        return usage(argv)
+        return usage()
     for command in commands:
         if command == argv[0]:
-            console_print(commands[command].__doc__.split('\n', 1)[1])
+            console_print(commands[command].__doc__.split('\n', 1)[1].strip())
             return
     for alias in aliases:
         if alias == argv[0]:
-            console_print(aliases[alias].__doc__.split('\n', 1)[1])
+            console_print(aliases[alias].__doc__.split('\n', 1)[1].strip())
             return
     console_print("unknown command '%s'" % argv[0], f=sys.stderr)
 
-def usage(argv):
+def usage():
     console_print("Dropbox command-line interface\n")
     console_print("commands:\n")
     console_print("Note: use dropbox help <command> to view usage for a specific command.\n")
     out = []
     for command in commands:
         out.append((command, commands[command].__doc__.splitlines()[0]))
+    out.sort(key=lambda x: x[0])
     spacing = max(len(o[0])+3 for o in out)
     for o in out:
         console_print(" %-*s%s" % (spacing, o[0], o[1]))
-    console_print()
 
 def main(argv):
     global commands
@@ -1542,7 +1569,7 @@ def main(argv):
             break
 
     if cut == None:
-        usage(argv)
+        usage()
         os._exit(0)
         return
 
