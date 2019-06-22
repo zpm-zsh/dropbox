@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -e
+
+find "$1" -type d -regex ".*\(.cache\|node_modules\|vendor\|bower_components\)$" -prune -exec dropbox-cli exclude add {} \;
