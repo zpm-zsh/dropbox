@@ -15,13 +15,14 @@ _1st_arguments=(
   'unlink'
 )
 
-_arguments : \
+
+_arguments -s -S \
 "-f[Load the configuration file from a specific file]" \
 "-s[Skip already existing files when download/upload. Default: Overwrite]" \
 "-d[Enable DEBUG mode]" \
-"-q[Quiet mode. Don't show messages]"\
-"-p[Show cURL progress meter]"\
-"-k[Doesn't check for SSL certificates (insecure)]"\
+"-q[Quiet mode Dont show messages]" \
+"-p[Show cURL progress meter]" \
+"-k[Doesn't check for SSL certificates (insecure)]" \
 '*:: :->subcmds' && return 0
 
 if (( CURRENT == 1 )); then
@@ -44,6 +45,5 @@ if (( CURRENT == 3 )); then
     ;;
   esac
 fi
-
 
 return
