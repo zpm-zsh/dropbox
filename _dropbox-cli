@@ -3,115 +3,115 @@
 
 local -a _1st_arguments
 _1st_arguments=(
-	'update:download latest version of dropbox'
-	'filestatus:get current sync status of one or more files'
-	'ls:list directory contents with current sync status'
-	'puburl:get public url of a file in your dropbox public folder'
-	'sharelink:get a shared link for a file in your dropbox'
-	'proxy:set proxy settings for Dropbox'
-	'throttle:set bandwidth limits for Dropbox'
-	'status:get current status of the dropboxd'
-	'running:return whether dropbox is running'
-	'stop:stop dropboxd'
-	'lansync:enables or disables LAN sync'
-	'exclude:ignores/excludes a directory from syncing'
-	'start:start dropboxd'
-	'autostart:automatically start dropbox at login'
-	'help:provide help'
-
+  'update:download latest version of dropbox'
+  'filestatus:get current sync status of one or more files'
+  'ls:list directory contents with current sync status'
+  'puburl:get public url of a file in your dropbox public folder'
+  'sharelink:get a shared link for a file in your dropbox'
+  'proxy:set proxy settings for Dropbox'
+  'throttle:set bandwidth limits for Dropbox'
+  'status:get current status of the dropboxd'
+  'running:return whether dropbox is running'
+  'stop:stop dropboxd'
+  'lansync:enables or disables LAN sync'
+  'exclude:ignores/excludes a directory from syncing'
+  'start:start dropboxd'
+  'autostart:automatically start dropbox at login'
+  'help:provide help'
+  
 )
 
 _dropbox_autostart=(
-	'y:dropbox will start automatically at login'
-	'n:dropbox will not start automatically at login'
+  'y:dropbox will start automatically at login'
+  'n:dropbox will not start automatically at login'
 )
 
 _dropbox_lansync=(
-	'y:dropbox will use LAN sync'
-	'n:dropbox will not use LAN sync'
+  'y:dropbox will use LAN sync'
+  'n:dropbox will not use LAN sync'
 )
 
 _dropbox_proxy=(
-	'none'
-	'auto'
-	'manual'
+  'none'
+  'auto'
+  'manual'
 )
 
 _dropbox_proxy_types=(
-	'http'
-	'socks4'
-	'socks5'
+  'http'
+  'socks4'
+  'socks5'
 )
 
 _dropbox_exclude=(
-	'list:prints a list of directories currently excluded from syncing'
-	'add:adds one or more directories to the exclusion list, then resynchronizes Dropbox'
-	'remove:removes one or more directories from the exclusion list, then resynchronizes Dropbox'
+  'list:prints a list of directories currently excluded from syncing'
+  'add:adds one or more directories to the exclusion list, then resynchronizes Dropbox'
+  'remove:removes one or more directories from the exclusion list, then resynchronizes Dropbox'
 )
 
 
 _dropbox_exclude_files=(
-    $(
-	    dropbox-cli exclude list | sed 1d | awk '{ print "\""$0"\""}'  
-    )
+  $(
+    dropbox-cli exclude list | sed 1d | awk '{ print "\""$0"\""}'
+  )
 )
 
 _arguments \
-	'*:: :->subcmds' && return 0
+'*:: :->subcmds' && return 0
 
 if (( CURRENT == 1 )); then
-	_describe -t commands "Dropbox-cli subcommand" _1st_arguments
-	return
+  _describe -t commands "Dropbox-cli subcommand" _1st_arguments
+  return
 fi
 
 if (( CURRENT == 2 )); then
-	case "$words[1]" in
-		autostart)
-			_describe -t commands "Dropbox-cli autostart" _dropbox_autostart
-		;;
-		lansync)
-			_describe -t commands "Dropbox-cli lansync" _dropbox_lansync
-		;;
-		proxy)
-			_describe -t commands "Dropbox-cli proxy" _dropbox_proxy
-		;;
-		exclude)
-			_describe -t commands "Dropbox-cli exclude" _dropbox_exclude
-		;;
-		puburl|ls|filestatus|sharelink)
-			_files
-		;;
-		*)
-			return
-		;;
-	esac
+  case "$words[1]" in
+    autostart)
+      _describe -t commands "Dropbox-cli autostart" _dropbox_autostart
+    ;;
+    lansync)
+      _describe -t commands "Dropbox-cli lansync" _dropbox_lansync
+    ;;
+    proxy)
+      _describe -t commands "Dropbox-cli proxy" _dropbox_proxy
+    ;;
+    exclude)
+      _describe -t commands "Dropbox-cli exclude" _dropbox_exclude
+    ;;
+    puburl|ls|filestatus|sharelink)
+      _files
+    ;;
+    *)
+      return
+    ;;
+  esac
 fi
 
 if (( CURRENT > 1 )); then
-	case "$words[1]" in
-		puburl|ls|filestatus|sharelink)
-			_files
-		;;
-	esac
+  case "$words[1]" in
+    puburl|ls|filestatus|sharelink)
+      _files
+    ;;
+  esac
 fi
 
 if (( CURRENT > 2 )); then
-	if [[ "$words[1]" == "exclude" ]]; then
-		case "$words[2]" in
-			add)
-				_files
-			;;
-			remove)
-  				_arguments "*: :( $_dropbox_exclude_files )" 
-			;;
-		esac
-	elif [[ "$words[1]" == "proxy" ]]; then
-		if (( CURRENT == 3 )); then
-			if [[ "$words[2]" == "manual" ]]; then
-				_describe -t commands "Dropbox-cli proxy" _dropbox_proxy_types
-			fi
-		fi
-	fi
+  if [[ "$words[1]" == "exclude" ]]; then
+    case "$words[2]" in
+      add)
+        _files
+      ;;
+      remove)
+        _arguments "*: :( $_dropbox_exclude_files )"
+      ;;
+    esac
+  elif [[ "$words[1]" == "proxy" ]]; then
+    if (( CURRENT == 3 )); then
+      if [[ "$words[2]" == "manual" ]]; then
+        _describe -t commands "Dropbox-cli proxy" _dropbox_proxy_types
+      fi
+    fi
+  fi
 fi
 
 
