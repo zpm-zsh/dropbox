@@ -3,22 +3,22 @@
 
 local -a _1st_arguments
 _1st_arguments=(
-  'update:download latest version of dropbox'
-  'filestatus:get current sync status of one or more files'
-  'ls:list directory contents with current sync status'
-  'puburl:get public url of a file in your dropbox public folder'
-  'sharelink:get a shared link for a file in your dropbox'
-  'proxy:set proxy settings for Dropbox'
-  'throttle:set bandwidth limits for Dropbox'
-  'status:get current status of the dropboxd'
-  'running:return whether dropbox is running'
-  'stop:stop dropboxd'
-  'lansync:enables or disables LAN sync'
-  'exclude:ignores/excludes a directory from syncing'
-  'start:start dropboxd'
-  'autostart:automatically start dropbox at login'
-  'help:provide help'
-  
+ 'autostart:automatically start Dropbox at login'
+ 'exclude:ignores\/excludes a directory from syncing'
+ 'filestatus:get current sync status of one or more files'
+ 'help:provide help'
+ 'lansync:enables or disables LAN sync'
+ 'ls:list directory contents with current sync status'
+ 'proxy:set proxy settings for Dropbox'
+ 'puburl:get public url of a file in your Dropbox public folder'
+ 'running:return whether Dropbox is running'
+ 'sharelink:get a shared link for a file in your Dropbox'
+ 'start:start dropboxd'
+ 'status:get current status of the dropboxd'
+ 'stop:stop dropboxd'
+ 'throttle:set bandwidth limits for Dropbox'
+ 'update:download latest version of Dropbox'
+ 'version:print version information for Dropbox'
 )
 
 _dropbox_autostart=(
