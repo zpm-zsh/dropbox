@@ -611,7 +611,7 @@ class CommandTicker(threading.Thread):
         first = True
         while True:
             self.stop_event.wait(0.25)
-            if self.stop_event.isSet(): break
+            if self.stop_event.is_set(): break
             if i == len(ticks):
                 first = False
                 i = 0
@@ -663,9 +663,11 @@ class DropboxCommand(object):
 
         self.f.flush()
 
-        # Start a ticker
-        ticker_thread = CommandTicker()
-        ticker_thread.start()
+        ticker_thread = None
+        if sys.stderr.isatty():
+            # Start a ticker
+            ticker_thread = CommandTicker()
+            ticker_thread.start()
 
         # This is the potentially long-running call.
         try:
@@ -673,9 +675,10 @@ class DropboxCommand(object):
         except KeyboardInterrupt:
             raise DropboxCommand.BadConnectionError("Keyboard interruption detected")
         finally:
-            # Tell the ticker to stop.
-            ticker_thread.stop()
-            ticker_thread.join()
+            if ticker_thread is not None:
+                # Tell the ticker to stop.
+                ticker_thread.stop()
+                ticker_thread.join()
 
         if ok:
             toret = {}
@@ -936,7 +939,11 @@ options:
                         init, cleanup = "\x1b[36;1m", "\x1b[0m"
                     elif status == "unsyncable":
                         init, cleanup = "\x1b[41;1m", "\x1b[0m"
-                    elif status == "selsync":
+                    elif status in ("selective sync", "ignored"):
+                        # https://help.dropbox.com/files-folders/restore-delete/ignored-files
+                        # gray-bar on local ignored files
+                        # formerly ignored files were local files under selsync paths
+                        # Accept "selective sync", in addition to "ignored" - for compatibility to < v94 of dropbox
                         init, cleanup = "\x1b[37;1m", "\x1b[0m"
                     else:
                         init, cleanup = '', ''
@@ -1019,6 +1026,8 @@ options:
                     try:
                         status = dc.icon_overlay_file_status(path=fp).get('status', ['unknown'])[0]
                         console_print("%-*s %s" % (indent, file+':', status))
+                    except DropboxCommand.BadConnectionError:
+                        console_print("Dropbox isn't responding!")
                     except DropboxCommand.CommandError as e:
                         console_print("%-*s %s" % (indent, file+':', e))
     except DropboxCommand.CouldntConnectError:
@@ -1313,7 +1322,10 @@ options:
         console_print(lansync.__doc__,linebreak=False)
     else:
         with closing(DropboxCommand()) as dc:
-            dc.set_lan_sync(lansync='enabled' if should_lansync else 'disabled')
+            try:
+                dc.set_lan_sync(lansync='enabled' if should_lansync else 'disabled')
+            except DropboxCommand.BadConnectionError:
+                console_print("Dropbox isn't responding!")
 
 
 @command
